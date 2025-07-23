@@ -33,6 +33,7 @@ func (c *TaskController) GetAllTasks(ctx *gin.Context) {
 
 func (c *TaskController) GetTaskByID(ctx *gin.Context) {
 	id := ctx.Param("id")
+
 	task := c.service.GetTask(id)
 	if task != nil {
 		ctx.JSON(http.StatusOK, task)
@@ -52,6 +53,7 @@ func (c *TaskController) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Task Must have title and status."})
 		return
 	}
+
 	err := c.service.AddTask(newTask)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -70,7 +72,9 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 	}
 	if NewTask.Title == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Task Title should not be Empty."})
+		return
 	}
+
 	err := c.service.UpdateTask(id, NewTask)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Task not found"})
@@ -81,10 +85,41 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 
 func (c *TaskController) DeleteTask(ctx *gin.Context) {
 	id := ctx.Param("id")
+
 	err := c.service.RemoveTask(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Task not found"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Task removed"})
+}
+
+func (c *TaskController) Register(ctx *gin.Context) {
+	var user models.User
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := c.service.RegisterUser(user); err != nil {
+		ctx.JSON(500, gin.H{"error": "Internal server error"})
+		return
+	}
+	ctx.JSON(200, gin.H{"message": "User registered successfully"})
+}
+
+func (c *TaskController) Login(ctx *gin.Context) {
+	var user models.User
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	token, err := c.service.UserLogin(user)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"Token": token})
+
 }

@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"task-manager-api/models"
-	"time"
 )
 
 // Service structure that interacts with the Repository Layer. For the time being it uses in memory storage.
@@ -19,13 +18,13 @@ type Service struct {
 }
 
 // Mock data that represents repository layer
-var tasks = []interface{}{
-	models.Task{ID: "1", Status: "In progress", Title: "Task 4", Description: "Backend with Go", DueDate: time.Now().AddDate(0, 0, 5)},
-	models.Task{ID: "2", Status: "Pending", Title: "Design API Endpoints", Description: "Plan REST API structure and routes for task management", DueDate: time.Now().AddDate(0, 0, 2)},
-	models.Task{ID: "3", Status: "Completed", Title: "Setup Database", Description: "Initialize PostgreSQL and create necessary tables", DueDate: time.Now().AddDate(0, 0, -3)},
-	models.Task{ID: "4", Status: "In progress", Title: "Write Unit Tests", Description: "Cover task controller with unit tests using testify", DueDate: time.Now().AddDate(0, 0, 7)},
-	models.Task{ID: "5", Status: "Pending", Title: "Dockerize App", Description: "Create Dockerfile and docker-compose for development", DueDate: time.Now().AddDate(0, 0, 10)},
-}
+// var tasks = []interface{}{
+// 	models.Task{ID: primitive.ObjectIDFromHex("1"), Status: "In progress", Title: "Task 4", Description: "Backend with Go", DueDate: time.Now().AddDate(0, 0, 5)},
+// 	models.Task{ID: primitive.ObjectIDFromHex("2"), Status: "Pending", Title: "Design API Endpoints", Description: "Plan REST API structure and routes for task management", DueDate: time.Now().AddDate(0, 0, 2)},
+// 	models.Task{ID: primitive.ObjectIDFromHex("3"), Status: "Completed", Title: "Setup Database", Description: "Initialize PostgreSQL and create necessary tables", DueDate: time.Now().AddDate(0, 0, -3)},
+// 	models.Task{ID: primitive.ObjectIDFromHex("4"), Status: "In progress", Title: "Write Unit Tests", Description: "Cover task controller with unit tests using testify", DueDate: time.Now().AddDate(0, 0, 7)},
+// 	models.Task{ID: primitive.ObjectIDFromHex("5"), Status: "Pending", Title: "Dockerize App", Description: "Create Dockerfile and docker-compose for development", DueDate: time.Now().AddDate(0, 0, 10)},
+// }
 
 func ConnectDB() *mongo.Database {
 
@@ -44,7 +43,7 @@ func ConnectDB() *mongo.Database {
 	fmt.Println("Connected to mongoDB successfully.")
 	collection := client.Database("Tasks_storage").Collection("Tasks")
 	collection.DeleteMany(context.TODO(), bson.D{{}})
-	collection.InsertMany(context.TODO(), tasks)
+	// collection.InsertMany(context.TODO(), tasks)
 	return collection.Database()
 
 }
@@ -81,7 +80,7 @@ func (s *Service) GetTasks() ([]models.Task, error) {
 }
 
 func (s *Service) GetTask(id string) *models.Task {
-	filter := bson.D{{Key: "id", Value: id}}
+	filter := bson.D{{Key: "_id", Value: id}}
 	var task models.Task
 	err := s.collection.FindOne(context.TODO(), filter).Decode(&task)
 	if err != nil {
@@ -92,7 +91,7 @@ func (s *Service) GetTask(id string) *models.Task {
 }
 
 func (s *Service) RemoveTask(id string) error {
-	filter := bson.D{{Key: "id", Value: id}}
+	filter := bson.D{{Key: "_id", Value: id}}
 	result, err := s.collection.DeleteOne(context.TODO(), filter)
 	if err != nil {
 		log.Println("Error deleting task:", err)
@@ -100,7 +99,7 @@ func (s *Service) RemoveTask(id string) error {
 	}
 
 	if result.DeletedCount == 0 {
-		return errors.New("No task found with the given ID")
+		return errors.New("no task found with the given iD")
 	}
 
 	log.Println("Task deleted successfully")
@@ -133,7 +132,7 @@ func (s *Service) UpdateTask(id string, task models.Task) error {
 		return nil
 	}
 
-	filter := bson.D{{Key: "id", Value: id}}
+	filter := bson.D{{Key: "_id", Value: id}}
 	update := bson.D{
 		{Key: "$set", Value: updateFields},
 	}

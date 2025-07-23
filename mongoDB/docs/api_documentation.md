@@ -1,6 +1,6 @@
 # Task Management API Documentation
 
-This document is detailed information on the Task Management REST API implemented using Go and the Gin Framework. The API supports basic CRUD operations for managing tasks. And also unlike the previous task which uses in memory storage, mongoDB is integrated with it.
+This document is detailed information on the Task Management REST API implemented using Go and the Gin Framework. The API supports basic CRUD operations for managing tasks. And also unlike the previous task which uses in memory storage, mongoDB is integrated with it and also authentication and authorization is also added. And for the User managment in memory storage is used. Middleware is added to authorize users based on the token returned from logging in to the application.
 **Base URL**
 http://localhost:9000
 
@@ -135,6 +135,30 @@ Response:
 
 ```json
 { "message": "Task not found" }
+```
+
+**6. Register User**
+Method: POST
+Path: /register
+Description: Registers a user.
+Response:
+200 OK
+
+```json
+{ "message": "User registered successfully" }
+```
+
+**6. User Login**
+Method: POST
+Path: /login
+Description: Authenticate Registered users.
+Response:
+200 OK
+
+```json
+{
+  "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImV4YW1wbGVAZ21haWwuY29tIiwidXNlcl9pZCI6MX0.BCX4CfwB5N-qK42aEe3cpOYbFD13ooPZkLf_fHwXSd8"
+}
 ```
 
 **Error Handling**
